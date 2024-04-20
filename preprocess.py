@@ -24,41 +24,39 @@ def token_lem(text):
 def rem_dup(arr):
     return list(dict.fromkeys(arr))
 
-# Function for generating the bag of words
-def gen_BOW(json_data):
-    bow = []
+# Function for getting the input and output text of the json data
+def get_inp_out(json_data):
+    inp, out = [], []
     for intent in json_data["intents"]:
         for text in intent["text"]:
-            for token in rem_dup(token_lem(text)):
-                if(token not in bow): bow.append(token)
+            inp.append(text)
+            out.append(intent["intent"])
+    return inp, out
+
+# Function for generating the bag of words
+def gen_BOW(inp):
+    bow = []
+    for text in inp:
+        for token in rem_dup(token_lem(text)):
+            if(token not in bow): bow.append(token)
     return sorted(bow)
 
 # Function for preprocessing the data using Bag of Words
-def BOW_preprocess(json_data, bow):
-    inp = []
-    out = []
-    for intent in json_data["intents"]:
-        for text in intent["text"]:
-            inp_row = rem_dup(token_lem(text))
-            temp = [1 if(x in inp_row) else 0 for x in bow]
-            inp.append(temp)
-            out.append(intent["intent"])
-    return inp, out
+def BOW_preprocess(inp, bow):
+    output = []
+    for text in inp:
+        inp_row = rem_dup(token_lem(text))
+        temp = [1 if(x in inp_row) else 0 for x in bow]
+        output.append(temp)
+    return output
 
 # Function for preprocessing the data using TF-IDF
-def TFIDF_preprocess(json_data, bow):
+def TFIDF_preprocess(inp, bow):
     vectorizer = TfidfVectorizer(vocabulary=bow, tokenizer=token_lem)
-    doc = []
-    out = []
-    for intent in json_data["intents"]:
-        for text in intent["text"]:
-            doc.append(text)
-            out.append(intent["intent"])
-    tfidf_matrix = vectorizer.fit_transform(doc)
+    tfidf_matrix = vectorizer.fit_transform(inp)
     df = pd.DataFrame(tfidf_matrix.todense(), columns=vectorizer.get_feature_names_out())
-    print(df)
-    inp = [list(row) for index, row in df.iterrows()]
-    return inp, out
+    output = [list(row) for index, row in df.iterrows()]
+    return output
 
 def W2Vec_preprocess(json_data):
     pass
@@ -71,10 +69,12 @@ def W2Vec_preprocess(json_data):
 
 
 # Testing Area
+
 json_data = read_json("init_data.json")
-bow = gen_BOW(json_data)
-x,y = TFIDF_preprocess(json_data, bow)
-print(x[1], y[1])
+x, y = get_inp_out(json_data)
+bow = gen_BOW(x)
+TFIDF_preprocess(x, bow)
+
 
 # text = "I AM ATOMIC."
 # tokens = tokenize(text)
