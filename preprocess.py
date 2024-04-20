@@ -47,7 +47,7 @@ def BOW_preprocess(json_data, bow):
 
 # Function for preprocessing the data using TF-IDF
 def TFIDF_preprocess(json_data, bow):
-    vectorizer = TfidfVectorizer()
+    vectorizer = TfidfVectorizer(vocabulary=bow, tokenizer=token_lem)
     doc = []
     out = []
     for intent in json_data["intents"]:
@@ -57,8 +57,8 @@ def TFIDF_preprocess(json_data, bow):
     tfidf_matrix = vectorizer.fit_transform(doc)
     df = pd.DataFrame(tfidf_matrix.todense(), columns=vectorizer.get_feature_names_out())
     print(df)
-    # inp = [list(row) for index, row in df.iterrows()]
-    # return inp, out
+    inp = [list(row) for index, row in df.iterrows()]
+    return inp, out
 
 def W2Vec_preprocess(json_data):
     pass
@@ -73,8 +73,8 @@ def W2Vec_preprocess(json_data):
 # Testing Area
 json_data = read_json("init_data.json")
 bow = gen_BOW(json_data)
-x, y = BOW_preprocess(json_data, bow)
-# TFIDF_preprocess(json_data, bow)
+x,y = TFIDF_preprocess(json_data, bow)
+print(x[1], y[1])
 
 # text = "I AM ATOMIC."
 # tokens = tokenize(text)
