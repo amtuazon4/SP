@@ -1,24 +1,24 @@
 # File for preprocessing
 
 import json
-import nltk.tokenize import word_tokenize
+import nltk
+from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+lemmatizer = WordNetLemmatizer()
 
 # Function for reading the dataset
 def read_json(filename):
     f = open(filename, "r")
     return json.load(f)
 
-# Function for tokenizing strings
-def tokenize(text):
-    return nltk.word_tokenize(text)
-
-# Function for lemmatization of a token
-def lem(word):
-    return stemmer.stem(word.lower())
+# Function for tokenizing a text
+# Also lemmatizes it
+def token_lem(text):
+    tokens = word_tokenize(text)
+    return [lemmatizer.lemmatize(token).lower() for token in tokens]
 
 # Function for removing duplicates
 def rem_dup(arr):
@@ -29,7 +29,7 @@ def gen_BOW(json_data):
     bow = []
     for intent in json_data["intents"]:
         for text in intent["text"]:
-            for token in rem_dup([lem(x) for x in tokenize(text)]):
+            for token in rem_dup(token_lem(text)):
                 if(token not in bow): bow.append(token)
     return sorted(bow)
 
@@ -39,7 +39,7 @@ def BOW_preprocess(json_data, bow):
     out = []
     for intent in json_data["intents"]:
         for text in intent["text"]:
-            inp_row = rem_dup([lem(x) for x in tokenize(text)])
+            inp_row = rem_dup(token_lem(text))
             temp = [1 if(x in inp_row) else 0 for x in bow]
             inp.append(temp)
             out.append(intent["intent"])
@@ -73,8 +73,8 @@ def W2Vec_preprocess(json_data):
 # Testing Area
 json_data = read_json("init_data.json")
 bow = gen_BOW(json_data)
-# x, y = TFIDF_preprocess(json_data, bow)
-TFIDF_preprocess(json_data, bow)
+x, y = BOW_preprocess(json_data, bow)
+# TFIDF_preprocess(json_data, bow)
 
 # text = "I AM ATOMIC."
 # tokens = tokenize(text)
