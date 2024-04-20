@@ -1,9 +1,8 @@
 # File for preprocessing
 
-import nltk
 import json
-from nltk.stem.porter import PorterStemmer
-stemmer = PorterStemmer()
+import nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -17,7 +16,7 @@ def read_json(filename):
 def tokenize(text):
     return nltk.word_tokenize(text)
 
-# Function for stemming/lemmatization of a token
+# Function for lemmatization of a token
 def lem(word):
     return stemmer.stem(word.lower())
 
@@ -47,7 +46,7 @@ def BOW_preprocess(json_data, bow):
     return inp, out
 
 # Function for preprocessing the data using TF-IDF
-def TFIDF_preprocess(json_data):
+def TFIDF_preprocess(json_data, bow):
     vectorizer = TfidfVectorizer()
     doc = []
     out = []
@@ -57,9 +56,12 @@ def TFIDF_preprocess(json_data):
             out.append(intent["intent"])
     tfidf_matrix = vectorizer.fit_transform(doc)
     df = pd.DataFrame(tfidf_matrix.todense(), columns=vectorizer.get_feature_names_out())
-    inp = [list(row) for index, row in df.iterrows()]
-    return inp, out
+    print(df)
+    # inp = [list(row) for index, row in df.iterrows()]
+    # return inp, out
 
+def W2Vec_preprocess(json_data):
+    pass
 
     
         
@@ -69,8 +71,10 @@ def TFIDF_preprocess(json_data):
 
 
 # Testing Area
-temp = read_json("init_data.json")
-x, y = TFIDF_preprocess(temp)
+json_data = read_json("init_data.json")
+bow = gen_BOW(json_data)
+# x, y = TFIDF_preprocess(json_data, bow)
+TFIDF_preprocess(json_data, bow)
 
 # text = "I AM ATOMIC."
 # tokens = tokenize(text)
