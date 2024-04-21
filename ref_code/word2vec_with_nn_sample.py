@@ -31,38 +31,41 @@ def pool_word_embeddings(text_data, word_vectors):
         tokens = text.split()
         # Filter tokens that are in the vocabulary of the Word2Vec model
         valid_tokens = [token for token in tokens if token in word_vectors]
+        
+        
         # Pool word embeddings using average pooling
         if valid_tokens:
             pooled_vector = np.mean([word_vectors[token] for token in valid_tokens], axis=0)
             pooled_vectors.append(pooled_vector)
         else:
             # Handle out-of-vocabulary words
-            pooled_vectors.append(np.zeros_like(word_vectors.wv.vector_size))
+            pooled_vectors.append(np.zeros(word_vectors.vector_size))
     return np.array(pooled_vectors)
 
 # Generate pooled representations for input text data
 pooled_input_data = pool_word_embeddings(text_data, word2vec_model.wv)
 
-# Define neural network architecture
-model = Sequential()
-model.add(Dense(64, activation='relu', input_dim=pooled_input_data.shape[1]))
-model.add(Dense(32, activation='relu'))
-model.add(Dense(1, activation='sigmoid'))
+# print(len(pooled_input_data))
+# # Define neural network architecture
+# model = Sequential()
+# model.add(Dense(64, activation='relu', input_dim=pooled_input_data.shape[1]))
+# model.add(Dense(32, activation='relu'))
+# model.add(Dense(1, activation='sigmoid'))
 
-# Compile the model
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+# # Compile the model
+# model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-# Train the model
-history = model.fit(pooled_input_data, labels, epochs=10, validation_split=0.2)
+# # Train the model
+# history = model.fit(pooled_input_data, labels, epochs=10, validation_split=0.2)
 
-# Extract training and validation loss values
-training_loss = history.history['loss']
-validation_loss = history.history['val_loss']
+# # Extract training and validation loss values
+# training_loss = history.history['loss']
+# validation_loss = history.history['val_loss']
 
-# Display training and validation loss per epoch
-for epoch in range(len(training_loss)):
-    print(f"Epoch {epoch + 1}: Training Loss = {training_loss[epoch]}, Validation Loss = {validation_loss[epoch]}")
+# # Display training and validation loss per epoch
+# for epoch in range(len(training_loss)):
+#     print(f"Epoch {epoch + 1}: Training Loss = {training_loss[epoch]}, Validation Loss = {validation_loss[epoch]}")
 
-# Evaluate the model
-loss, accuracy = model.evaluate(pooled_input_data, labels)
-print("Accuracy:", accuracy)
+# # Evaluate the model
+# loss, accuracy = model.evaluate(pooled_input_data, labels)
+# print("Accuracy:", accuracy)

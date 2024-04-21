@@ -72,19 +72,12 @@ def W2Vec_preprocess(inp):
     w2vec_model = Word2Vec(sentences=tokenized_data, vector_size=100, window=5, min_count=1, workers=4)
     output = []
     for data in tokenized_data:
-        temp = []
-        for token in data:
-            if(token in w2vec_model.wv.index_to_key):
-                temp.append(mean_pool(w2vec_model.wv[token]))
-        output.append(temp)
-
+        valid_tokens = [token for token in data if token in w2vec_model.wv]
+        if(valid_tokens):
+            output.append(np.mean([w2vec_model.wv[token] for token in valid_tokens], axis=0))
+        else:
+            output.append(np.zeros(w2vec_model.wv.vector_size))
     return output, w2vec_model
-
-    
-        
-
-
-
 
 
 # Testing Area
@@ -92,9 +85,7 @@ def W2Vec_preprocess(inp):
 json_data = read_json("init_data.json")
 x, y = get_inp_out(json_data)
 bow = gen_BOW(x)
-
-temp, model = W2Vec_preprocess(x)
-print(temp[0])
+W2Vec_preprocess(x)
 
 
 
