@@ -6,6 +6,8 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
+from gensim.models import Word2Vec
+import numpy as np
 
 lemmatizer = WordNetLemmatizer()
 
@@ -58,8 +60,25 @@ def TFIDF_preprocess(inp, bow):
     output = [list(row) for index, row in df.iterrows()]
     return output
 
-def W2Vec_preprocess(json_data):
-    pass
+# Function that performs mean pooling
+def mean_pool(vec):
+    return np.mean(vec)
+
+# Function for preprocessing the data using word2vec
+def W2Vec_preprocess(inp):
+    tokenized_data = []
+    for text in inp:
+        tokenized_data.append(token_lem(text))
+    w2vec_model = Word2Vec(sentences=tokenized_data, vector_size=100, window=5, min_count=1, workers=4)
+    output = []
+    for data in tokenized_data:
+        temp = []
+        for token in data:
+            if(token in w2vec_model.wv.index_to_key):
+                temp.append(mean_pool(w2vec_model.wv[token]))
+        output.append(temp)
+
+    return output, w2vec_model
 
     
         
@@ -73,7 +92,10 @@ def W2Vec_preprocess(json_data):
 json_data = read_json("init_data.json")
 x, y = get_inp_out(json_data)
 bow = gen_BOW(x)
-TFIDF_preprocess(x, bow)
+
+temp, model = W2Vec_preprocess(x)
+print(temp[0])
+
 
 
 # text = "I AM ATOMIC."
