@@ -60,15 +60,9 @@ def TFIDF_preprocess(inp, bow):
     output = [list(row) for index, row in df.iterrows()]
     return output
 
-# Function that performs mean pooling
-def mean_pool(vec):
-    return np.mean(vec)
-
 # Function for preprocessing the data using word2vec
 def W2Vec_preprocess(inp):
-    tokenized_data = []
-    for text in inp:
-        tokenized_data.append(token_lem(text))
+    tokenized_data = [token_lem(text) for text in inp]
     w2vec_model = Word2Vec(sentences=tokenized_data, vector_size=100, window=5, min_count=1, workers=4)
     output = []
     for data in tokenized_data:
@@ -81,14 +75,7 @@ def W2Vec_preprocess(inp):
 
 
 # Testing Area
-
 json_data = read_json("init_data.json")
 x, y = get_inp_out(json_data)
 bow = gen_BOW(x)
-W2Vec_preprocess(x)
-
-
-
-# text = "I AM ATOMIC."
-# tokens = tokenize(text)
-# temp = fix_tokens(tokens)
+inp, model = W2Vec_preprocess(x)
