@@ -45,9 +45,10 @@ def pool_word_embeddings(text_data, word_vectors):
 # Generate pooled representations for input text data
 pooled_input_data = pool_word_embeddings(text_data, word2vec_model.wv)
 
-print(len(pooled_input_data))
 # Define neural network architecture
 model = Sequential()
+
+exit()
 model.add(Dense(64, activation='relu', input_dim=pooled_input_data.shape[1]))
 model.add(Dense(32, activation='relu'))
 model.add(Dense(1, activation='sigmoid'))
