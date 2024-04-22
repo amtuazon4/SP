@@ -10,11 +10,19 @@ from sklearn.metrics import f1_score
 class Neural_net():
     # Initialize the Neural network
     def __init__(self, Inodes, Hlayers, Hnodes, Onodes):
+        self.Inodes = Inodes
+        self.Hlayers = Hlayers
+        self.Hnodes = Hnodes
+        self.Onodes = Onodes
+        self.init_model()
+    
+    # initialize neural network model
+    def init_model(self):
         self.model = Sequential()
-        self.model.add(Input(shape=(Inodes,)))
-        for i in range(Hlayers):
-            self.model.add(Dense(Hnodes, activation="relu"))
-        self.model.add(Dense(Onodes, activation="softmax"))
+        self.model.add(Input(shape=(self.Inodes,)))
+        for i in range(self.Hlayers):
+            self.model.add(Dense(self.Hnodes, activation="relu"))
+        self.model.add(Dense(self.Onodes, activation="softmax"))
         self.model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["mse"])
     
     # Trains the neural network
@@ -35,6 +43,7 @@ class Neural_net():
 
         f1_scores = []
         for train_index, val_index in kfold_indices:
+            self.init_model()
             inp_train = np.array([inp_data[i] for i in train_index])
             out_train = np.array([out_data[i] for i in train_index])
             inp_valid = np.array([inp_data[i] for i in val_index])
@@ -44,8 +53,8 @@ class Neural_net():
             predictions = temp_model.predict(inp_valid)
             pred_labels = np.argmax(predictions, axis=1)
             f1_scores.append(f1_score(out_valid, pred_labels, average="weighted"))
-        
-        print(f1_scores)
+        f1_scores = np.array(f1_scores)
+        return np.mean(f1_scores)
         
 
     

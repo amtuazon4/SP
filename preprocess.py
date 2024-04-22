@@ -60,7 +60,7 @@ def TFIDF_preprocess(inp, bow):
     vectorizer = TfidfVectorizer(vocabulary=bow, tokenizer=token_lem)
     tfidf_matrix = vectorizer.fit_transform(inp)
     df = pd.DataFrame(tfidf_matrix.todense(), columns=vectorizer.get_feature_names_out())
-    output = [list(row) for index, row in df.iterrows()]
+    output = [np.array(row) for index, row in df.iterrows()]
     return output
 
 # Function for preprocessing the data using word2vec
