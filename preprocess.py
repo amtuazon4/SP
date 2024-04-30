@@ -69,7 +69,7 @@ def BOW_preprocess(inp, bow):
         inp_row = rem_dup(token_lem(text))
         temp = np.array([1 if(x in inp_row) else 0 for x in bow])
         output.append(temp)
-    return output
+    return np.array(output)
 
 # Function for preprocessing the data using TF-IDF
 def TFIDF_preprocess(inp, bow):

@@ -6,22 +6,27 @@ import time
 import numpy as np
 
 # Read the dataset
-json_data = read_json("init_data.json")
-inp_text, out_name, out_num = get_inp_out(json_data)
+json_data = read_json("init_data2.json")
+inp, out, resp, inp_proc, out_proc = get_inp_resp(json_data)
+out_proc2, lb = preprocess_out(out_proc)
 
 # Get the bag of words of the text
-bow = gen_BOW(inp_text)
+bow = gen_BOW(inp)
 
 
 start_time = time.time()
 # Preprocesses the text using Bag of Words
-inp_bow = BOW_preprocess(inp_text, bow)
+inp_bow = BOW_preprocess(inp_proc, bow)
 end_time = time.time()
 
 # Create the neural network
-nn = Neural_net(len(bow), 1, 272, 39)
+nn = Neural_net(len(bow), 1, 272, len(out_proc2[0]))
+
+
 
 # Perform K-folds validation
-val = nn.kfold_eval(inp_bow, out_num)
+val = nn.kfold_eval(inp_bow, out_proc2, inp, out)
+
+exit()
 print(f"Processing Time: {end_time - start_time} seconds.")
 print(f"Accuracy: {val}")
