@@ -22,8 +22,8 @@ class Neural_net():
         self.model.add(Input(shape=(self.Inodes,)))
         for i in range(self.Hlayers):
             self.model.add(Dense(self.Hnodes, activation="relu"))
-        self.model.add(Dense(self.Onodes, activation="softmax"))
-        self.model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["mse"])
+        self.model.add(Dense(self.Onodes, activation="sigmoid"))
+        self.model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["mse"])
     
     # Trains the neural network
     # returns the history of the training
@@ -52,11 +52,11 @@ class Neural_net():
             temp_model = load_model("model_temp.keras")
             predictions = temp_model.predict(inp_valid)
             pred_labels = np.argmax(predictions, axis=1)
-            f1_scores.append(f1_score(out_valid, pred_labels, average="weighted"))
+            f1_scores.append(f1_score(out_valid, pred_labels, average="micro"))
+
         f1_scores = np.array(f1_scores)
         return np.mean(f1_scores)
         
-
     
 
     

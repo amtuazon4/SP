@@ -8,6 +8,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from gensim.models import Word2Vec
 import numpy as np
+from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 
 lemmatizer = WordNetLemmatizer()
 
@@ -39,10 +40,14 @@ def get_inp_resp2(json_data):
     inp, out = [], []
     for intent in json_data["intents"]:
         for text in intent["patterns"]:
-            for resp in text["responses"]:
+            for resp in intent["responses"]:
                 inp.append(text)
                 out.append(resp)
     return inp, out
+
+def binarize_label(out):
+    lb = LabelBinarizer()
+    return lb.fit_transform(out), lb
 
 # Function for generating the bag of words
 def gen_BOW(inp):
@@ -83,8 +88,6 @@ def W2Vec_preprocess(inp):
     return output, w2vec_model
 
 json_data = read_json("init_data2.json")
-x, y = get_inp_resp(json_data)
-bow = gen_BOW(x)
-temp, model = W2Vec_preprocess(x)
-print(temp)
+x, y = get_inp_resp2(json_data)
+print(binarize_label(y)[1].classes_)
 
