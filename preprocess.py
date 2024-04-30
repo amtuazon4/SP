@@ -29,25 +29,30 @@ def rem_dup(arr):
 
 # Function for getting the input and output text of the json data
 def get_inp_resp(json_data):
+    # inp -> every input text in the dataset
+    # out -> for every input text in inp, the corresponding group of responses (the indexes rather)
+    # resp -> every response in the dataset, basis for the index in the out array
+    # inp_proc -> input texts to be fed to the neural network
+    # out_proc -> output classes for every input text
     inp, out = [], []
-    for intent in json_data["intents"]:
-        for text in intent["patterns"]:
-            inp.append(text)
-            out.append(intent["responses"])
-    return inp, out
+    resp = []
+    inp_proc, out_proc = [], []
 
-def get_inp_resp2(json_data):
-    inp, out = [], []
-    for intent in json_data["intents"]:
-        for text in intent["patterns"]:
-            for resp in intent["responses"]:
-                inp.append(text)
-                out.append(resp)
-    return inp, out
+    count = 0
+    for i, intent in enumerate(json_data["intents"]):
+        inp += intent["patterns"]
+        resp += intent["responses"]
+        out += [list(range(count, count+len(intent["responses"]))) for x in range(len(intent["patterns"]))]
+        for pat in intent["patterns"]:
+            for num in list(range(count, count+len(intent["responses"]))):
+                inp_proc.append(pat)
+                out_proc.append(num)
+        count += len(intent["responses"])
+    return inp, out, resp, inp_proc, out_proc
 
-def binarize_label(out):
+def preprocess_out(out_proc):
     lb = LabelBinarizer()
-    return lb.fit_transform(out), lb
+    return lb.fit_transform(out_proc), lb
 
 # Function for generating the bag of words
 def gen_BOW(inp):
@@ -88,6 +93,6 @@ def W2Vec_preprocess(inp):
     return output, w2vec_model
 
 json_data = read_json("init_data2.json")
-x, y = get_inp_resp2(json_data)
-print(binarize_label(y)[1].classes_)
+inp, out, resp, inp_proc, out_proc = get_inp_resp(json_data)
+out_proc2, lb = preprocess_out(out_proc)
 
