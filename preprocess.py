@@ -27,16 +27,22 @@ def rem_dup(arr):
     return list(dict.fromkeys(arr))
 
 # Function for getting the input and output text of the json data
-def get_inp_out(json_data):
-    inp, out_class, out_num = [], [], []
-    num = 0
+def get_inp_resp(json_data):
+    inp, out = [], []
     for intent in json_data["intents"]:
-        for text in intent["text"]:
+        for text in intent["patterns"]:
             inp.append(text)
-            out_class.append(intent["intent"])
-            out_num.append(num)
-        num += 1
-    return inp, out_class, out_num
+            out.append(intent["responses"])
+    return inp, out
+
+def get_inp_resp2(json_data):
+    inp, out = [], []
+    for intent in json_data["intents"]:
+        for text in intent["patterns"]:
+            for resp in text["responses"]:
+                inp.append(text)
+                out.append(resp)
+    return inp, out
 
 # Function for generating the bag of words
 def gen_BOW(inp):
@@ -76,4 +82,9 @@ def W2Vec_preprocess(inp):
             output.append(np.zeros(w2vec_model.wv.vector_size))
     return output, w2vec_model
 
+json_data = read_json("init_data2.json")
+x, y = get_inp_resp(json_data)
+bow = gen_BOW(x)
+temp, model = W2Vec_preprocess(x)
+print(temp)
 
