@@ -25,7 +25,7 @@ nn = Neural_net(len(bow), 1, 272, len(out_proc2[0]))
 
 
 # Perform K-folds validation
-acc, f1 = nn.kfold_eval(inp_bow, out_proc2, (inp, out, inp_proc, out_proc))
+acc, f1 = nn.kfold_eval(inp_bow, out_proc2, (inp, out, resp, inp_proc, out_proc))
 
 print(acc, f1)
 exit()

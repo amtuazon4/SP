@@ -3,14 +3,26 @@ from keras.models import Sequential, load_model
 from keras.layers import Dense, Input
 from keras.callbacks import ModelCheckpoint
 from sklearn.model_selection import KFold
-from sklearn.metrics import f1_score
+from sklearn.metrics import precision_recall_fscore_support
+from sklearn.preprocessing import MultiLabelBinarizer, LabelBinarizer
 
 def measure_acc(pred_out, true_out, val_index, ref):
-    inp, out, inp_proc, out_proc = ref
+    inp, out, resp, inp_proc, out_proc = ref
     count = 0
     for i, val_i in enumerate(val_index):
         if(pred_out[i] in out[inp.index(inp_proc[val_i])]): count += 1
     return count/len(val_index)    
+
+def measure_f1score(pred_out, true_out, val_index, ref):
+    inp, out, resp, inp_proc, out_proc = ref
+    true_out2 = [out[inp.index(inp_proc[x])] for x in val_index]
+    lb = LabelBinarizer()
+    lb.fit(list(range(0, len(resp))))
+    mlb = MultiLabelBinarizer(classes=list(range(0, len(resp))))
+    true_out3 = mlb.fit_transform(true_out2)
+    pred_out2 = lb.transform(pred_out)
+    precision, recall, f1_score, _ = precision_recall_fscore_support(true_out3, pred_out2, average="samples")
+    return f1_score
 
 # Class for the Neural network
 # implements a Feed forward Neural network
@@ -63,8 +75,7 @@ class Neural_net():
             true_out = [np.argmax(x) for x in out_valid]
             
             acc.append(measure_acc(pred_out, true_out, val_index, ref))
-            f1_scores.append(f1_score(true_out, pred_out, average="micro"))
-
+            f1_scores.append(measure_f1score(pred_out, true_out, val_index, ref))
         acc = np.array(acc)
         f1_scores = np.array(f1_scores)
         return np.mean(acc), np.mean(f1_scores)
