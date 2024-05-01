@@ -25,8 +25,9 @@ nn = Neural_net(len(bow), 1, 272, len(out_proc2[0]))
 
 
 # Perform K-folds validation
-val = nn.kfold_eval(inp_bow, out_proc2, inp, out)
+acc, f1 = nn.kfold_eval(inp_bow, out_proc2, (inp, out, inp_proc, out_proc))
 
+print(acc, f1)
 exit()
 print(f"Processing Time: {end_time - start_time} seconds.")
 print(f"Accuracy: {val}")
