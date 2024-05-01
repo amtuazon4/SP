@@ -22,5 +22,15 @@ preprocessing_time = time.time() - start_time
 nn = Neural_net(len(bow), 1, 272, len(out_proc2[0]))
 
 # Perform K-folds validation
-acc, f1 , train_time = nn.kfold_eval(tfidf_bow, out_proc2, "tfidf",(inp, out, resp, inp_proc, out_proc))
-print(acc, f1, train_time)
+epochs = 10
+batch_size = 32
+acc, f1 , train_time = nn.kfold_eval(tfidf_bow, out_proc2, "tfidf",(inp, out, resp, inp_proc, out_proc), epochs, batch_size)
+fp = open("tfidf_models/tfidf_results.txt", "w")
+fp.write(f"accuracy: {acc}\n")
+fp.write(f"f1-score: {f1}\n")
+fp.write(f"preprocessing_time: {preprocessing_time}\n")
+fp.write(f"preprocessing_time + training_time: {preprocessing_time + train_time}\n")
+fp.write(f"epochs, batch_size = {epochs}, {batch_size}")
+fp.close()
+
+

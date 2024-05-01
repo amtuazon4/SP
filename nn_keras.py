@@ -61,7 +61,7 @@ class Neural_net():
     def evaluate(self, input_data, labels):
         return model.evaluate(input_data, labels)
 
-    def kfold_eval(self, inp_data, out_data, emb_type,ref):
+    def kfold_eval(self, inp_data, out_data, emb_type,ref, epoch, batch_size):
         kfold = KFold(n_splits=5, shuffle=True, random_state=42)
         kfold_indices = kfold.split(inp_data, out_data)
         acc = []
@@ -81,7 +81,7 @@ class Neural_net():
 
             # Train the Neural Network
             start_time = time.time()
-            hist = self.train(inp_train, out_train, inp_valid, out_valid, 10, 32, f"{emb_type}_models/{emb_type}_{knum}.keras")
+            hist = self.train(inp_train, out_train, inp_valid, out_valid, epoch, batch_size, f"{emb_type}_models/{emb_type}_{knum}.keras")
             end_time = time.time()
             train_times.append(end_time-start_time)
         

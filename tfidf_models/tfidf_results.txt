@@ -1,0 +1,4 @@
+accuracy: 0.9551969618205973
+f1-score: 0.1965836378978517
+preprocessing_time: 0.7657780647277832
+preprocessing_time + training_time: 52.79471101760864
