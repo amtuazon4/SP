@@ -7,24 +7,27 @@ import numpy as np
 
 # Read the dataset and preprocesses the dataset
 json_data = read_json("init_data2.json")
-inp, out, resp, inp_proc, out_proc = get_inp_resp(json_data)
-out_proc2, lb = preprocess_out(out_proc)
+inp, out, resp = get_inp_resp(json_data)
+
+out2, mlb = preprocess_out(out)
 
 # Get the bag of words of the text
 bow = gen_BOW(inp)
 
 # Preprocesses the text using Bag of Words
 start_time = time.time()
-inp_bow = BOW_preprocess(inp_proc, bow)
+inp_bow = BOW_preprocess(inp, bow)
 preprocessing_time = time.time() - start_time
 
 # Create the neural network
-nn = Neural_net(len(bow), 1, 544, len(out_proc2[0]))
+nn = Neural_net(len(bow), 1, 544, len(out2[0]))
+
+exit()
 
 # Perform K-folds validation
 epochs = 3
 batch_size = 32
-acc, f1 , train_time = nn.kfold_eval(inp_bow, out_proc2, "bow",(inp, out, resp, inp_proc, out_proc), epochs, batch_size)
+acc, f1 , train_time = nn.kfold_eval(inp_bow, out2, "bow",(inp, out, resp, inp_proc, out_proc), epochs, batch_size)
 fp = open("bow_models/bow_results.txt", "w")
 fp.write(f"accuracy: {acc}\n")
 fp.write(f"f1-score: {f1}\n")
