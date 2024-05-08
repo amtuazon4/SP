@@ -82,7 +82,7 @@ def TFIDF_preprocess(inp, bow):
 # Function for preprocessing the data using word2vec
 def W2Vec_preprocess(inp):
     tokenized_data = [token_lem(text) for text in inp]
-    w2vec_model = Word2Vec(sentences=tokenized_data, vector_size=100, window=5, min_count=1, workers=4)
+    w2vec_model = Word2Vec(sentences=tokenized_data, vector_size=933, window=5, min_count=1, workers=4)
     output = []
     for data in tokenized_data:
         valid_tokens = [token for token in data if token in w2vec_model.wv]

@@ -13,14 +13,14 @@ out_proc2, lb = preprocess_out(out_proc)
 start_time = time.time()
 # Preprocesses the text using Bag of Words
 inp_w2vec, w2vec_model = W2Vec_preprocess(inp_proc)
-end_time = time.time()
+preprocessing_time = time.time() - start_time
 
 
 # Create the neural network
-nn = Neural_net(len(inp_w2vec[0]), 1, 272, len(out_proc2[0]))
+nn = Neural_net(len(inp_w2vec[0]), 1, 544, len(out_proc2[0]))
 
 # Perform K-folds validation
-epochs = 10
+epochs = 500
 batch_size = 32
 acc, f1 , train_time = nn.kfold_eval(inp_w2vec, out_proc2, "w2vec",(inp, out, resp, inp_proc, out_proc), epochs, batch_size)
 fp = open("w2vec_models/w2vec_results.txt", "w")

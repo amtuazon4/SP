@@ -1,4 +1,5 @@
-accuracy: 0.6849451485671378
-f1-score: 0.10391611499813742
-preprocessing_time: 1.1207280158996582
-preprocessing_time + training_time: 6.979279232025147
+accuracy: 0.9570641590547154
+f1-score: 0.19675558273423946
+preprocessing_time: 1.0577809810638428
+preprocessing_time + training_time: 537.5104268550873
+epochs, batch_size = 500, 32
