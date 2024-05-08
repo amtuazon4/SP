@@ -3,31 +3,47 @@ from keras.models import Sequential, load_model
 from keras.layers import Dense, Input
 from keras.callbacks import ModelCheckpoint
 from sklearn.model_selection import KFold
-from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import f1_score
 from sklearn.preprocessing import MultiLabelBinarizer, LabelBinarizer
 import matplotlib.pyplot as plt
 import os
 import time
 
+def acc_per_label(pred_out_binary, true_out):
+    accuracy_per_label = []
+    for i in range(true_out.shape[1]):
+        TP = np.sum((pred_out_binary[:,i]==1) & (true_out[:,i]==1))
+        TN = np.sum((pred_out_binary[:,i]==0) & (true_out[:,i]==0))
+        FP = np.sum((pred_out_binary[:,i]==1) & (true_out[:,i]==0))
+        FN = np.sum((pred_out_binary[:,i]==0) & (true_out[:,i]==1))
+        
+        label_acc = (TP+TN)/(TP+TN+FP+FN)
+        accuracy_per_label.append(label_acc)
+    return accuracy_per_label
+
+def comp_class_freq(true_out):
+    return np.sum(true_out, axis=0)
+
 # Function for measuring the accuracy of the model
 def measure_acc(pred_out, true_out, val_index, ref):
-    inp, out, resp, inp_proc, out_proc = ref
-    count = 0
-    for i, val_i in enumerate(val_index):
-        if(pred_out[i] in out[inp.index(inp_proc[val_i])]): count += 1
-    return count/len(val_index)    
+    inp, out, resp = ref
+    pred_out1 = np.round(np.array(pred_out) >= 0.5)
+    accuracy_per_label = acc_per_label(pred_out1, true_out)
+    class_freq = comp_class_freq(true_out)
+    return np.sum(accuracy_per_label * class_freq)/ np.sum(class_freq)
+    
 
 # Function for measuring the f1-score of the model
 def measure_f1score(pred_out, true_out, val_index, ref):
-    inp, out, resp, inp_proc, out_proc = ref
-    true_out2 = [out[inp.index(inp_proc[x])] for x in val_index]
-    lb = LabelBinarizer()
-    lb.fit(list(range(0, len(resp))))
-    mlb = MultiLabelBinarizer(classes=list(range(0, len(resp))))
-    true_out3 = mlb.fit_transform(true_out2)
-    pred_out2 = lb.transform(pred_out)
-    precision, recall, f1_score, _ = precision_recall_fscore_support(true_out3, pred_out2, average="samples")
-    return f1_score
+    inp, out, resp = ref
+    pred_out1 = np.array(pred_out) >= 0.5
+    pred_out2 = pred_out1.astype(int)
+    relevant_labels = np.any(true_out, axis=0)|np.any(pred_out2, axis=0)
+    
+    relevant_pred_out = pred_out2[:, relevant_labels]
+    relevant_true_out = true_out[:, relevant_labels]
+    print(relevant_true_out, len(relevant_true_out))
+    return f1_score(relevant_true_out, relevant_pred_out, average="weighted")
 
 # Class for the Neural network
 # implements a Feed forward Neural network
@@ -61,7 +77,7 @@ class Neural_net():
     def evaluate(self, input_data, labels):
         return model.evaluate(input_data, labels)
 
-    def kfold_eval(self, inp_data, out_data, emb_type,ref, epoch, batch_size):
+    def kfold_eval(self, inp_data, out_data, emb_type, ref, epoch, batch_size):
         kfold = KFold(n_splits=5, shuffle=True, random_state=42)
         kfold_indices = kfold.split(inp_data, out_data)
         acc = []
@@ -69,7 +85,6 @@ class Neural_net():
         train_times = []
         knum = 1
         for train_index, val_index in kfold_indices:
-            
             # Reinitialize the neural network
             self.init_model()
 
@@ -89,8 +104,12 @@ class Neural_net():
             self.export_fig(hist, f"{emb_type}_{knum}", emb_type, knum)
             temp_model = load_model(f"{emb_type}_models/{emb_type}_{knum}.keras")
             predictions = temp_model.predict(inp_valid)
-            pred_out = [np.argmax(x) for x in predictions]
-            true_out = [np.argmax(x) for x in out_valid]
+
+            temp = measure_acc(predictions, out_valid, val_index, ref)
+            print(temp)
+            f1__score = measure_f1score(predictions, out_valid, val_index, ref)
+            print(f1__score)
+            exit()
             acc.append(measure_acc(pred_out, true_out, val_index, ref))
             f1_scores.append(measure_f1score(pred_out, true_out, val_index, ref))
             knum += 1
