@@ -82,9 +82,6 @@ class Neural_net():
         train_times = []
         knum = 1
         for train_index, val_index in kfold_indices:
-            # save the training and validation indices
-            self.export_kfold_indices(emb_type, train_index, val_index)
-            
             # Reinitialize the neural network
             self.init_model()
 
@@ -102,6 +99,10 @@ class Neural_net():
         
             # Evaluate the accuracy and f1_score
             self.export_fig(hist, f"{emb_type}_{knum}", emb_type, knum)
+
+            # save the training and validation indices
+            self.export_kfold_indices(emb_type, train_index, val_index)
+
             temp_model = load_model(f"{emb_type}_models/{emb_type}_{knum}.keras")
             predictions = temp_model.predict(inp_valid)
             acc.append(measure_acc(predictions, out_valid, val_index, ref))
@@ -142,9 +143,10 @@ class Neural_net():
 
     def reset_kfold_indices(self, emb_type):
         orig_dir = os.getcwd()
-        os.chdir(orig_dir + f"\{emb_type}_models")
-        open("kfold_indices.txt", "w").close()
-        os.chdir(orig_dir)
+        if(os.path.exists(orig_dir + f"/{emb_type}_models")): 
+            os.chdir(orig_dir + f"\{emb_type}_models")
+            open("kfold_indices.txt", "w").close()
+            os.chdir(orig_dir)
 
 
     

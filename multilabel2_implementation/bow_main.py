@@ -9,6 +9,7 @@ import numpy as np
 json_data = read_json("init_data2.json")
 inp, out, resp = get_inp_resp(json_data)
 
+# Preprocesses the output
 out2, mlb = preprocess_out(out)
 
 # Get the bag of words of the text
