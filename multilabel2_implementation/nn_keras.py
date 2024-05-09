@@ -72,7 +72,9 @@ class Neural_net():
     def evaluate(self, input_data, labels):
         return model.evaluate(input_data, labels)
 
+    # Performs kfold cross validation
     def kfold_eval(self, inp_data, out_data, emb_type, ref, epoch, batch_size):
+        self.reset_kfold_indices(emb_type)
         kfold = KFold(n_splits=5, shuffle=True, random_state=42)
         kfold_indices = kfold.split(inp_data, out_data)
         acc = []
@@ -80,6 +82,9 @@ class Neural_net():
         train_times = []
         knum = 1
         for train_index, val_index in kfold_indices:
+            # save the training and validation indices
+            self.export_kfold_indices(emb_type, train_index, val_index)
+            
             # Reinitialize the neural network
             self.init_model()
 
@@ -124,6 +129,21 @@ class Neural_net():
         plt.ylabel('Error')
         plt.legend()
         plt.savefig(filename)
+        os.chdir(orig_dir)
+
+    def export_kfold_indices(self, emb_type, train_index, valid_index):
+        orig_dir = os.getcwd()
+        os.chdir(orig_dir + f"\{emb_type}_models")
+        fp = open("kfold_indices.txt", "a")
+        fp.write("".join([f"{x} " for x in train_index] + ["\n"]))
+        fp.write("".join([f"{x} " for x in valid_index] + ["\n"]))
+        fp.close()
+        os.chdir(orig_dir)
+
+    def reset_kfold_indices(self, emb_type):
+        orig_dir = os.getcwd()
+        os.chdir(orig_dir + f"\{emb_type}_models")
+        open("kfold_indices.txt", "w").close()
         os.chdir(orig_dir)
 
 

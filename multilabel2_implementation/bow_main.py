@@ -20,7 +20,11 @@ inp_bow = BOW_preprocess(inp, bow)
 preprocessing_time = time.time() - start_time
 
 # Create the neural network
-nn = Neural_net(len(bow), 1, 544, len(out2[0]))
+inp_nodes = len(bow)
+hid_layers = 1
+hid_nodes = 544
+out_nodes = len(out2[0])
+nn = Neural_net(inp_nodes, hid_layers, hid_nodes, out_nodes)
 
 
 # Perform K-folds validation
@@ -28,11 +32,12 @@ epochs = 10
 batch_size = 32
 acc, f1 , train_time = nn.kfold_eval(inp_bow, out2, "bow",(inp, out, resp), epochs, batch_size)
 
-
 fp = open("bow_models/bow_results.txt", "w")
 fp.write(f"accuracy: {acc}\n")
 fp.write(f"f1-score: {f1}\n")
 fp.write(f"preprocessing_time: {preprocessing_time}\n")
+fp.write(f"train_time: {train_time}\n")
 fp.write(f"preprocessing_time + training_time: {preprocessing_time + train_time}\n")
-fp.write(f"epochs, batch_size = {epochs}, {batch_size}")
+fp.write(f"epochs, batch_size = {epochs}, {batch_size}\n")
+fp.write(f"inp_nodes, hid_layers, hid_nodes, out_nodes = {inp_nodes}, {hid_layers}, {hid_nodes}, {out_nodes}")
 fp.close()
