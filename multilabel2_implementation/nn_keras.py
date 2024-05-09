@@ -38,12 +38,7 @@ def measure_f1score(pred_out, true_out, val_index, ref):
     inp, out, resp = ref
     pred_out1 = np.array(pred_out) >= 0.5
     pred_out2 = pred_out1.astype(int)
-    relevant_labels = np.any(true_out, axis=0)|np.any(pred_out2, axis=0)
-    
-    relevant_pred_out = pred_out2[:, relevant_labels]
-    relevant_true_out = true_out[:, relevant_labels]
-    print(relevant_true_out, len(relevant_true_out))
-    return f1_score(relevant_true_out, relevant_pred_out, average="weighted")
+    return f1_score(true_out, pred_out2, average="weighted", zero_division=0)
 
 # Class for the Neural network
 # implements a Feed forward Neural network
@@ -104,14 +99,8 @@ class Neural_net():
             self.export_fig(hist, f"{emb_type}_{knum}", emb_type, knum)
             temp_model = load_model(f"{emb_type}_models/{emb_type}_{knum}.keras")
             predictions = temp_model.predict(inp_valid)
-
-            temp = measure_acc(predictions, out_valid, val_index, ref)
-            print(temp)
-            f1__score = measure_f1score(predictions, out_valid, val_index, ref)
-            print(f1__score)
-            exit()
-            acc.append(measure_acc(pred_out, true_out, val_index, ref))
-            f1_scores.append(measure_f1score(pred_out, true_out, val_index, ref))
+            acc.append(measure_acc(predictions, out_valid, val_index, ref))
+            f1_scores.append(measure_f1score(predictions, out_valid, val_index, ref))
             knum += 1
         
         # Takes the mean value of the accuracies, f1-socres, and training times of the splits

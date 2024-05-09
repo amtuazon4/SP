@@ -24,11 +24,10 @@ nn = Neural_net(len(bow), 1, 544, len(out2[0]))
 
 
 # Perform K-folds validation
-epochs = 50
+epochs = 10
 batch_size = 32
 acc, f1 , train_time = nn.kfold_eval(inp_bow, out2, "bow",(inp, out, resp), epochs, batch_size)
 
-exit()
 
 fp = open("bow_models/bow_results.txt", "w")
 fp.write(f"accuracy: {acc}\n")
