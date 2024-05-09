@@ -4,6 +4,7 @@ from nn_keras import *
 from keras.utils import to_categorical
 import time
 import numpy as np
+import os
 
 # Read the dataset
 json_data = read_json("init_data2.json")
@@ -17,15 +18,19 @@ start_time = time.time()
 inp_w2vec, w2vec_model = W2Vec_preprocess(inp)
 preprocessing_time = time.time() - start_time
 
+os.makedirs("w2vec_models", exist_ok=True)
+w2vec_model_name = os.path.join("w2vec_models", "word2vec.bin")
+w2vec_model.save(w2vec_model_name)
+
 # Create the neural network
 inp_nodes = len(inp_w2vec[0])
-hid_layers = 1
-hid_nodes = 544
+hid_layers = 2
+hid_nodes = 1024
 out_nodes = len(out2[0])
 nn = Neural_net(inp_nodes, hid_layers, hid_nodes, out_nodes)
 
 # Perform K-folds validation
-epochs = 10
+epochs = 500
 batch_size = 32
 acc, f1 , train_time = nn.kfold_eval(inp_w2vec, out2, "w2vec",(inp, out, resp), epochs, batch_size)
 

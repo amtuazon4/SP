@@ -22,13 +22,13 @@ preprocessing_time = time.time() - start_time
 
 # Create the neural network
 inp_nodes = len(bow)
-hid_layers = 1
-hid_nodes = 544
+hid_layers = 2
+hid_nodes = 1024
 out_nodes = len(out2[0])
 nn = Neural_net(inp_nodes, hid_layers, hid_nodes, out_nodes)
 
 # Perform K-folds validation
-epochs = 10
+epochs = 500
 batch_size = 32
 acc, f1 , train_time = nn.kfold_eval(tfidf_bow, out2, "tfidf",(inp, out, resp), epochs, batch_size)
 

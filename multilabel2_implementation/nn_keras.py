@@ -63,8 +63,6 @@ class Neural_net():
     # Trains the neural network
     # returns the history of the training
     def train(self, trainX, trainY, validX, validY, epoch, b_size, fname):
-        # trainY = to_categorical(trainY)
-        # validY = to_categorical(validY)
         checkpoint = ModelCheckpoint(fname, monitor='val_mse', mode='min', save_best_only=True, verbose=1)
         return self.model.fit(trainX, trainY, validation_data=(validX, validY), epochs=epoch, batch_size=b_size, callbacks=[checkpoint])
 
@@ -93,7 +91,8 @@ class Neural_net():
 
             # Train the Neural Network
             start_time = time.time()
-            hist = self.train(inp_train, out_train, inp_valid, out_valid, epoch, batch_size, f"{emb_type}_models/{emb_type}_{knum}.keras")
+            # , f"{emb_type}_models/{emb_type}_{knum}.keras"
+            hist = self.train(inp_train, out_train, inp_valid, out_valid, epoch, batch_size, os.path.join(f"{emb_type}_models", f"{emb_type}_{knum}.keras"))
             end_time = time.time()
             train_times.append(end_time-start_time)
         
@@ -103,7 +102,7 @@ class Neural_net():
             # save the training and validation indices
             self.export_kfold_indices(emb_type, train_index, val_index)
 
-            temp_model = load_model(f"{emb_type}_models/{emb_type}_{knum}.keras")
+            temp_model = self.load_keras_model(f"{emb_type}_{knum}.keras", emb_type, knum)
             predictions = temp_model.predict(inp_valid)
             acc.append(measure_acc(predictions, out_valid, val_index, ref))
             f1_scores.append(measure_f1score(predictions, out_valid, val_index, ref))
@@ -147,6 +146,13 @@ class Neural_net():
             os.chdir(orig_dir + f"\{emb_type}_models")
             open("kfold_indices.txt", "w").close()
             os.chdir(orig_dir)
+
+    def load_keras_model(self, filename, emb_type, knum):
+        orig_dir = os.getcwd()
+        os.chdir(orig_dir + f"\{emb_type}_models")
+        temp_model = load_model(f"{emb_type}_{knum}.keras")
+        os.chdir(orig_dir)
+        return temp_model
 
 
     
