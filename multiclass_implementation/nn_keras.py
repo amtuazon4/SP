@@ -47,7 +47,7 @@ class Neural_net():
         total_samples = np.sum(class_frequencies)
         class_weights = np.where(class_frequencies > 0, total_samples / (len(class_frequencies) * class_frequencies), 0)
         class_weight_dict = dict(enumerate(class_weights))
-        checkpoint = ModelCheckpoint(fname, monitor='val_mse', mode='min', save_best_only=True, verbose=1)
+        checkpoint = ModelCheckpoint(fname, monitor='val_loss', mode='min', save_best_only=True, verbose=1)
         return self.model.fit(trainX, trainY, class_weight=class_weight_dict, validation_data=(validX, validY), epochs=epoch, batch_size=b_size, callbacks=[checkpoint])
 
     # Evaluates the input data provided using the model
