@@ -29,7 +29,7 @@ nn = Neural_net(inp_nodes, hid_layers, hid_nodes, out_nodes)
 
 
 # Perform K-folds validation
-epochs = 10
+epochs = 500
 batch_size = 32
 acc, f1 , train_time = nn.kfold_eval(inp_bow, out2, "bow",(inp, out, tags), epochs, batch_size)
 

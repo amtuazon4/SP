@@ -8,6 +8,7 @@ from sklearn.preprocessing import MultiLabelBinarizer, LabelBinarizer
 import matplotlib.pyplot as plt
 import os
 import time
+from sklearn.utils.class_weight import compute_class_weight
 
 def measure_acc(pred_out, true_out):
     count = 0
@@ -42,8 +43,12 @@ class Neural_net():
     # Trains the neural network
     # returns the history of the training
     def train(self, trainX, trainY, validX, validY, epoch, b_size, fname):
+        class_frequencies = np.sum(trainY, axis=0)
+        total_samples = np.sum(class_frequencies)
+        class_weights = np.where(class_frequencies > 0, total_samples / (len(class_frequencies) * class_frequencies), 0)
+        class_weight_dict = dict(enumerate(class_weights))
         checkpoint = ModelCheckpoint(fname, monitor='val_mse', mode='min', save_best_only=True, verbose=1)
-        return self.model.fit(trainX, trainY, validation_data=(validX, validY), epochs=epoch, batch_size=b_size, callbacks=[checkpoint])
+        return self.model.fit(trainX, trainY, class_weight=class_weight_dict, validation_data=(validX, validY), epochs=epoch, batch_size=b_size, callbacks=[checkpoint])
 
     # Evaluates the input data provided using the model
     def evaluate(self, input_data, labels):
@@ -70,7 +75,7 @@ class Neural_net():
 
             # Train the Neural Network
             start_time = time.time()
-            hist = self.train(inp_train, out_train, inp_valid, out_valid, epoch, batch_size, os.path.join(f"{emb_type}_models", f"{emb_type}_{knum}.keras"))
+            hist = self.train(inp_train, out_train, inp_valid, out_valid, epoch, batch_size, f"{emb_type}_models/{emb_type}_{knum}.keras")
             end_time = time.time()
             train_times.append(end_time-start_time)
 

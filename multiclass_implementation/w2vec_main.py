@@ -24,7 +24,7 @@ w2vec_model.save(w2vec_model_name)
 
 # Create the neural network
 inp_nodes = len(inp_w2vec[0])
-hid_layers = 2
+hid_layers = 3
 hid_nodes = 1024
 out_nodes = len(out2[0])
 nn = Neural_net(inp_nodes, hid_layers, hid_nodes, out_nodes)
