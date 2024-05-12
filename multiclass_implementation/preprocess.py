@@ -80,7 +80,7 @@ def W2Vec_preprocess(inp):
     for data in tokenized_data:
         valid_tokens = [token for token in data if token in w2vec_model.wv]
         if(valid_tokens):
-            output.append(np.mean([w2vec_model.wv[token] for token in valid_tokens], axis=0))
+            output.append(np.max([w2vec_model.wv[token] for token in valid_tokens], axis=0))
         else:
             output.append(np.zeros(w2vec_model.wv.vector_size))
     return output, w2vec_model

@@ -43,12 +43,13 @@ class Neural_net():
     # Trains the neural network
     # returns the history of the training
     def train(self, trainX, trainY, validX, validY, epoch, b_size, fname):
-        class_frequencies = np.sum(trainY, axis=0)
-        total_samples = np.sum(class_frequencies)
-        class_weights = np.where(class_frequencies > 0, total_samples / (len(class_frequencies) * class_frequencies), 0)
-        class_weight_dict = dict(enumerate(class_weights))
+        # class_frequencies = np.sum(trainY, axis=0)
+        # total_samples = np.sum(class_frequencies)
+        # class_weights = np.where(class_frequencies > 0, total_samples / (len(class_frequencies) * class_frequencies), 0)
+        # class_weight_dict = dict(enumerate(class_weights))
         checkpoint = ModelCheckpoint(fname, monitor='val_loss', mode='min', save_best_only=True, verbose=1)
-        return self.model.fit(trainX, trainY, class_weight=class_weight_dict, validation_data=(validX, validY), epochs=epoch, batch_size=b_size, callbacks=[checkpoint])
+        return self.model.fit(trainX, trainY, validation_data=(validX, validY), epochs=epoch, batch_size=b_size, callbacks=[checkpoint])
+        # return self.model.fit(trainX, trainY, class_weight=class_weight_dict, validation_data=(validX, validY), epochs=epoch, batch_size=b_size, callbacks=[checkpoint])
 
     # Evaluates the input data provided using the model
     def evaluate(self, input_data, labels):
@@ -89,8 +90,11 @@ class Neural_net():
             predictions = temp_model.predict(inp_valid)
             pred_out = [np.argmax(x) for x in predictions]
             true_out = [np.argmax(x) for x in out_valid]
-            acc.append(measure_acc(pred_out, true_out))
-            f1_scores.append(measure_f1score(pred_out, true_out))
+            acc_k = measure_acc(pred_out, true_out)
+            f1_k = measure_f1score(pred_out, true_out)
+            self.export_acc_f1_knum(emb_type, knum, acc_k, f1_k)
+            acc.append(acc_k)
+            f1_scores.append(f1_k)
             knum += 1
         
         # Takes the mean value of the accuracies, f1-socres, and training times of the splits
@@ -139,7 +143,15 @@ class Neural_net():
         os.chdir(orig_dir)
         return temp_model
 
+    def export_acc_f1_knum(self, emb_type, knum, acc, f1):
+        orig_dir = os.getcwd()
+        os.chdir(orig_dir + f"\{emb_type}_models")
+        fp = open("acc_f1_per_model.txt", "a")
+        fp.write(f"{emb_type}_{knum}: {acc}, {f1}\n")
+        fp.close()
+        os.chdir(orig_dir)
 
+    
     
 
 

@@ -5,6 +5,7 @@ from keras.callbacks import ModelCheckpoint
 from sklearn.model_selection import KFold
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import MultiLabelBinarizer, LabelBinarizer
+from sklearn.utils.class_weight import compute_class_weight
 import matplotlib.pyplot as plt
 import os
 import time
@@ -63,8 +64,12 @@ class Neural_net():
     # Trains the neural network
     # returns the history of the training
     def train(self, trainX, trainY, validX, validY, epoch, b_size, fname):
-        checkpoint = ModelCheckpoint(fname, monitor='val_mse', mode='min', save_best_only=True, verbose=1)
-        return self.model.fit(trainX, trainY, validation_data=(validX, validY), epochs=epoch, batch_size=b_size, callbacks=[checkpoint])
+        class_frequencies = np.sum(trainY, axis=0)
+        total_samples = len(trainY)
+        class_weights = np.where(class_frequencies > 0, total_samples / (len(class_frequencies) * class_frequencies), 0)
+        class_weight_dict = dict(enumerate(class_weights))
+        checkpoint = ModelCheckpoint(fname, monitor='val_loss', mode='min', save_best_only=True, verbose=1)
+        return self.model.fit(trainX, trainY, class_weight=class_weight_dict , validation_data=(validX, validY), epochs=epoch, batch_size=b_size, callbacks=[checkpoint])
 
     # Evaluates the input data provided using the model
     def evaluate(self, input_data, labels):
@@ -72,7 +77,7 @@ class Neural_net():
 
     # Performs kfold cross validation
     def kfold_eval(self, inp_data, out_data, emb_type, ref, epoch, batch_size):
-        self.reset_kfold_indices(emb_type)
+        self.reset_output_files(emb_type)
         kfold = KFold(n_splits=5, shuffle=True, random_state=42)
         kfold_indices = kfold.split(inp_data, out_data)
         acc = []
@@ -104,8 +109,11 @@ class Neural_net():
 
             temp_model = self.load_keras_model(f"{emb_type}_{knum}.keras", emb_type, knum)
             predictions = temp_model.predict(inp_valid)
-            acc.append(measure_acc(predictions, out_valid, val_index, ref))
-            f1_scores.append(measure_f1score(predictions, out_valid, val_index, ref))
+            acc_k = measure_acc(predictions, out_valid, val_index, ref)
+            f1_k = measure_f1score(predictions, out_valid, val_index, ref)
+            self.export_acc_f1_knum(emb_type, knum, acc_k, f1_k)
+            acc.append(acc_k)
+            f1_scores.append(f1_k)
             knum += 1
         
         # Takes the mean value of the accuracies, f1-socres, and training times of the splits
@@ -140,11 +148,12 @@ class Neural_net():
         fp.close()
         os.chdir(orig_dir)
 
-    def reset_kfold_indices(self, emb_type):
+    def reset_output_files(self, emb_type):
         orig_dir = os.getcwd()
         if(os.path.exists(orig_dir + f"/{emb_type}_models")): 
             os.chdir(orig_dir + f"\{emb_type}_models")
             open("kfold_indices.txt", "w").close()
+            open("acc_f1_per_model.txt", "w").close()
             os.chdir(orig_dir)
 
     def load_keras_model(self, filename, emb_type, knum):
@@ -154,6 +163,13 @@ class Neural_net():
         os.chdir(orig_dir)
         return temp_model
 
+    def export_acc_f1_knum(self, emb_type, knum, acc, f1):
+        orig_dir = os.getcwd()
+        os.chdir(orig_dir + f"\{emb_type}_models")
+        fp = open("acc_f1_per_model.txt", "a")
+        fp.write(f"{emb_type}_{knum}: {acc}, {f1}\n")
+        fp.close()
+        os.chdir(orig_dir)
 
     
 

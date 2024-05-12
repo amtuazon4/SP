@@ -24,13 +24,13 @@ w2vec_model.save(w2vec_model_name)
 
 # Create the neural network
 inp_nodes = len(inp_w2vec[0])
-hid_layers = 3
+hid_layers = 2
 hid_nodes = 1024
 out_nodes = len(out2[0])
 nn = Neural_net(inp_nodes, hid_layers, hid_nodes, out_nodes)
 
 # Perform K-folds validation
-epochs = 500
+epochs = 100
 batch_size = 32
 acc, f1 , train_time = nn.kfold_eval(inp_w2vec, out2, "w2vec",(inp, out, tags), epochs, batch_size)
 

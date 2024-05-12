@@ -1,0 +1,7 @@
+accuracy: 0.03895131086142321
+f1-score: 0.00787007043153937
+preprocessing_time: 1.1581673622131348
+train_time: 348.84195017814636
+preprocessing_time + training_time: 350.0001175403595
+epochs, batch_size = 500, 32
+inp_nodes, hid_layers, hid_nodes, out_nodes = 933, 2, 1024, 139
