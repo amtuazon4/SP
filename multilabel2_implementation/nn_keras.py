@@ -33,13 +33,41 @@ def measure_acc(pred_out, true_out, val_index, ref):
     class_freq = comp_class_freq(true_out)
     return np.sum(accuracy_per_label * class_freq)/ np.sum(class_freq)
     
+def f1_per_label(pred_out_binary, true_out):
+    f1score_per_label = []
+    for i in range(true_out.shape[1]):
+        TP = np.sum((pred_out_binary[:,i]==1) & (true_out[:,i]==1))
+        TN = np.sum((pred_out_binary[:,i]==0) & (true_out[:,i]==0))
+        FP = np.sum((pred_out_binary[:,i]==1) & (true_out[:,i]==0))
+        FN = np.sum((pred_out_binary[:,i]==0) & (true_out[:,i]==1))
+        precision = (TP)/(TP+FP)
+        recall = (TP)/(TP+FN)
+        if(TP==0 and FP==0 and FN==0): print(i)
+        f1score_per_label.append((2*(precision*recall))/(precision+recall))
+    return f1score_per_label
 
 # Function for measuring the f1-score of the model
 def measure_f1score(pred_out, true_out, val_index, ref):
     inp, out, resp = ref
     pred_out1 = np.array(pred_out) >= 0.5
     pred_out2 = pred_out1.astype(int)
-    return f1_score(true_out, pred_out2, average="weighted", zero_division=0)
+    # f1score_per_label = f1_per_label(pred_out2, true_out)
+    # class_freq = comp_class_freq(true_out)
+    f1score_per_label = []
+    for i in range(true_out.shape[1]):
+        TP = np.sum((pred_out_binary[:,i]==1) & (true_out[:,i]==1))
+        TN = np.sum((pred_out_binary[:,i]==0) & (true_out[:,i]==0))
+        FP = np.sum((pred_out_binary[:,i]==1) & (true_out[:,i]==0))
+        FN = np.sum((pred_out_binary[:,i]==0) & (true_out[:,i]==1))
+        precision = (TP)/(TP+FP)
+        recall = (TP)/(TP+FN)
+        if(TP==0 and FP==0 and FN==0): print(i)
+        f1score_per_label.append((2*(precision*recall))/(precision+recall))
+    
+    
+    # for i in range(len(class_freq)):
+    #     print(f1score_per_label[i], class_freq[i])
+    exit()
 
 # Class for the Neural network
 # implements a Feed forward Neural network
@@ -97,7 +125,7 @@ class Neural_net():
             # Train the Neural Network
             start_time = time.time()
             # , f"{emb_type}_models/{emb_type}_{knum}.keras"
-            hist = self.train(inp_train, out_train, inp_valid, out_valid, epoch, batch_size, os.path.join(f"{emb_type}_models", f"{emb_type}_{knum}.keras"))
+            hist = self.train(inp_train, out_train, inp_valid, out_valid, epoch, batch_size, f"{emb_type}_models/{emb_type}_{knum}.keras")
             end_time = time.time()
             train_times.append(end_time-start_time)
         
